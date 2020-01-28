@@ -1,0 +1,629 @@
+\documentclass{anstrans}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Application of the Karhunen-Lo\`{e}ve Transform to the C5G7 benchmark in
+the Response Matrix Method}
+\author{Richard L. Reed, Jeremy A. Roberts}
+
+\institute{
+Mechanical and Nuclear Engineering, Kansas State University, Manhattan, KS
+}
+
+\email{rlreed@k-state.edu \and jaroberts@k-state.edu}
+
+% Optional disclaimer: remove this command to hide
+%\disclaimer{Notice: This manuscript is a work of fiction. Any resemblance to
+%actual articles, living or dead, is purely coincidental.}
+
+%%%% packages and definitions (optional)
+\usepackage{graphicx} % allows inclusion of graphics
+\usepackage{booktabs} % nice rules (thick lines) for tables
+\usepackage{tabulary}
+\usepackage{microtype} % improves typography for PDF
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{tikz}
+\usepackage{verbatim}
+\usepackage{braket}
+\usepackage[superscript,nospace]{cite}
+\usepackage{amssymb}
+\usepackage{morefloats}
+\usepackage{todonotes}
+\usepackage{esvect}
+\usepackage[amssymb,cdot]{SIunits}
+\usepackage{geometry}
+
+\graphicspath{{figures/}} % Specifies the directory where pictures are stored
+
+% put your own definitions here:
+\newcommand{\SN}{S$_N$}
+\renewcommand{\vec}[1]{\bm{#1}} %vector is bold italic
+\newcommand{\vd}{\bm{\cdot}} % slightly bold vector dot
+\newcommand{\grad}{\vec{\nabla}} % gradient
+\newcommand{\ud}{\mathop{}\!\mathrm{d}} % upright derivative symbol
+%   \newcommand{\cZ}{\cal{Z}}
+%   \newtheorem{def}{Definition}[section]
+%   ...
+\newcommand{\oper}[1]{\mathcal{#1}}
+\providecommand{\e}[1]{\ensuremath{\times 10^{#1}}}
+\newcommand{\CHAPTER}[1]{Chapter~\ref{#1}}
+\newcommand{\EQ}[1]{Eq.~(\ref{#1})}               %-- Eq. (refeq)
+\newcommand{\EQUATION}[1]{Equation~(\ref{#1})}    %-- Equation (refeq)
+\newcommand{\FIG}[1]{Fig.~\ref{#1}}               %-- Fig. refig
+\newcommand{\FIGS}[2]{Fig.~\ref{#1}~and~\ref{#2}} %-- Fig. refig
+\newcommand{\FIGURE}[1]{Figure~\ref{#1}}
+\newcommand{\TAB}[1]{Table~\ref{#1}}              %-- Table tablref
+\newcommand{\EQS}[2]{Eqs.~(\ref{#1})--(\ref{#2})}            %-- Eqs. (refeqs)
+\newcommand{\EQUATIONS}[2]{Equations~(\ref{#1})--(\ref{#2})}   %-- Eqs. (refeqs)
+\newcommand{\EQSTWO}[2]{Eqs.~(\ref{#1})~and~(\ref{#2})}     %-- Eqs. (refeqs)
+\newcommand{\EQUATIONSTWO}[2]{Equations~(\ref{#1})~and~(\ref{#2})}
+%-- Eqs. (refeqs
+\newcommand{\BOXEQ}[1]{\mbox{\fboxsep=.13in $$
+        \framebox{$ #1 $} $$ } }    %-- box around equation
+\DeclareMathOperator*{\dotp}{{\scriptscriptstyle \stackrel{\bullet}{{}}}}
+
+\begin{document}
+\section{Introduction}
+
+Previous work used the Karhunen-Lo\`{e}ve Transform (KLT) to create
+basis sets for representing the energy variable in the eigenvalue response
+matrix method (ERMM) and demonstrated the efficiency of such basis sets for
+1-D problems \cite{annualANS, reedThesis}.
+ The present work provides an extension of the KLT basis sets to the 2-D, C5G7
+benchmark problem. ERMM solves the reactor eigenvalue equation,
+\begin{equation}
+  \mathcal{T} \phi(\bm{\rho}) =
+    \frac{1}{k} \mathcal{F} \phi(\bm{\rho}) \, ,
+  \label{eq:global}
+\end{equation}
+where $\bm{\rho}$ contains the relevant phase space (i.e., space, angle, and
+energy),
+by decomposing the domain into independent nodes linked through approximate
+boundary conditions that are based on truncated, orthogonal basis expansions.
+The
+success of ERMM in realistic applications is highly dependent on the
+selection of orthogonal bases in each phase space variable.  Basis
+sets that capture
+high-fidelity transport solutions with low-order expansions are ideal.
+In what follows, ERMM and KLT basis are briefly reviewed, and their application
+to a modified C5G7 problem is presented.
+
+\section{Methods}
+
+\subsection{Overview of ERMM}
+
+Suppose the global problem of \EQ{eq:global} is defined over a
+volume, $V$, which can be decomposed into $N$ disjoint, nodal subvolumes,
+$V_i$, that satisfy $V = V_1 \bigcup V_2 \bigcup \ldots \bigcup V_N$.
+Then a local transport problem for the $i$th node is defined
+\begin{equation}
+  \mathcal{T} \phi(\bm{\rho}_i) =
+    \frac{1}{k} \mathcal{F} \phi(\bm{\rho}_i) \, ,
+  \label{eq:local}
+\end{equation}
+subject to the incident current boundary condition
+\begin{equation}
+  J^{\mathrm{}}_{-} (\bm{\rho}_{is}) =
+    J^{\mathrm{global}}_{-}(\bm{\rho}_{is}) \, ,
+  \label{eq:localbc}
+\end{equation}
+where $J_{-} (\bm{\rho}_{is}) $ is the incident angular current on
+surface $s$.  To reduce the size of the problem space, the local boundary
+currents are represented as a truncated
+expansion in an
+orthogonal basis, $P_m(\bm{\rho}_{is}), \,\,\, m = 0, \, 1, \, \ldots$,
+defined over the surface phase space $\bm{\rho}_{is}$.
+% is used subject to
+% \begin{equation}
+%    \int d\rho_{is} P_m(\bm{\rho}_{is})P_n(\bm{\rho}_{is}) = \delta_{mn} \, .
+% \end{equation}
+By solving Eq. \ref{eq:local} subject to the $m$th order
+incident condition
+\begin{equation}
+ J^{}_{-} (\bm{\rho}_{is}) = P_m(\bm{\rho}_{is}) \,
+\end{equation}
+on one surface, $s$, and vacuum elsewhere,
+a response function is defined as
+\begin{equation}
+       r^{ms}_{im's'} = \int d\rho_{is'} P_{m'}(\bm{\rho}_{is'})
+        J_{+} (\bm{\rho}_{is'}) \, ,
+\label{eq:responsefunction}
+\end{equation}
+where $J^+$ is the outgoing angular current.  The
+response function $r^{ms}_{im's'}$
+is the $m'$th order current response out of
+surface $s'$ due to an $m$th order incident current on
+surface $s$.
+
+By expressing the incident and outgoing currents, $J_{\mp}$, as truncated
+expansions in the basis, global neutron balance can be represented by the
+response matrix equation
+\begin{equation}
+  \mathbf{M}\mathbf{R}(k)\mathbf{J_-}  = \lambda \mathbf{J_-} \, ,
+\label{eq:erme}
+\end{equation}
+where $\mathbf{R}$ contains response functions, $\mathbf{J}_{-}$ contains the
+incident angular current expansion coefficients, $\mathbf{M}$ is a matrix that
+redirects outgoing currents as incident currents of neighbors, and $\lambda$ is
+an eigenvalue that approaches unity as $k$ approaches its correct value. The
+$k$-eigenvalue is computed iteratively by alternately solving for
+$\mathbf{J}_{-}$ and updating $k$ based on balance \cite{RobertsSerment}.
+
+\subsection{Expanding in Energy}
+
+The present work focused solely on expansion of the energy variable.
+Traditionally, RMMs have used a full multigroup
+representation of the energy variable, which is to say no truncation for
+the energy basis is used.  Response matrix methods have been used
+successfully with a variety of energy group structures, ranging from three to
+190 groups \cite{ishii2009tdd, forget2006tdh, forget2004hcm}.
+
+In general, RRM is prohibitively expensive unless the problem space is
+greatly reduced by truncating the boundary conditions to each node.  Thus, an
+effective basis set will permit the use of a low-order expansion without
+introducing a large error.  Realistic problems require on the order of dozens
+of energy groups
+or more, and a basis that can capture many-group fidelity with
+many fewer energy degrees of freedom would be of substantial
+value to RMM.
+
+Recent work investigated the use of discrete Legendre polynomials (DLP) and
+modified DLP (mDLP) for expansion in energy \cite{Roberts2014}.  The mDLP basis
+modifies the DLP basis by superimposing a ``shape'' vector on each basis vector.
+ The shape vector is chosen to be representative of the vector subject to
+expansion, i.e., the energy-dependent angular current.  Previously, a spatially
+averaged energy spectrum from a representative lattice problem has been used
+with moderate success \cite{Roberts2014}.
+
+\subsection{The  Karhunen-Lo\`{e}ve Energy Basis}
+
+A more powerful approach (compared to mDLP) of incorporating physics into the
+basis functions is to use the Karhunen-Lo\`{e}ve transform (KLT)
+\cite{Dony2001}.  The central goal of KLT is to approximate a discrete or
+continuous function $f(x)$ as a truncated expansion in an orthogonal basis whose
+functions yield the best possible $n$th-order approximation in terms of
+least-squares error for all values of $n$ by extracting information about the
+representative spectra in the problem space.  In some applications, such as
+image compression, the function $f$ is predetermined, e.g., a set of pixel
+values, while in other applications, such as reduced-order modeling, the
+function $f$ is not known.  While details of its use in these applications may
+differ, KLT is fundamentally related to the singular value decomposition (SVD)
+\cite{reedThesis}.
+
+The implementation algorithm for computing the basis
+functions, $P^i_{\text{KLT}}(:)$, begins by forming the data matrix
+$\mathbf{D}$.  Let the $n$th current vector be denoted by
+$\mathbf{d}_n$.  These
+vectors, referred to as snapshots, are combined to form the
+matrix $\mathbf{D} \in \mathbb{R}^{G\times N}$, which is defined as $\mathbf{D}
+= [\mathbf{d}_1,\, \mathbf{d}_2,\, \ldots, \, \mathbf{d}_N]$
+\cite{Meyer2002}, where $G$ is the number of energy groups and $N$ is the total
+number of snapshots. Then the matrix
+$\mathbf{B} \in \mathbb{R}^{N\times N}$ is defined as
+\begin{equation}
+    \mathbf{B} = \mathbf{D}^{\intercal}\mathbf{D} \, .
+    \label{eq:KLT}
+\end{equation}
+Next, find the eigenvectors corresponding to the largest eigenvalues of the
+matrix
+$\mathbf{B}$,
+\begin{equation}
+    \label{eq:SVD_of_B}
+    \mathbf{B} = \mathbf{Q}\mathbf{\Lambda}\mathbf{Q}^{-1}\, ,
+\end{equation}
+where $\mathbf{Q}$ from \EQ{eq:SVD_of_B} is equal
+to $\mathbf{V}$
+from the SVD of $\mathbf{D}$, and is thus the set of
+eigenvectors of
+$\mathbf{D}$. The eigenvectors $\mathbf{q}_j$ (columns of $\mathbf{Q}$ from
+\EQ{eq:SVD_of_B}), are
+then multiplied by the data matrix to form the basis vectors $P^j_{KLT}(:)$,
+i.e.,
+\begin{equation}
+    P^j_{KLT}(:) = \mathbf{D}\mathbf{q}_j \, ,
+\end{equation}
+which are subsequently orthonormalized.  Then, an approximate representation of
+an arbitrary $N$-vector $\mathbf{f}$ in the basis is
+\begin{equation}
+    \mathbf{f} \approx \sum_j a_j P^j_{KLT}(:) \, \quad \text{where} \quad a_j
+    =
+    \mathbf{f}^T P^j_{KLT}(:) \, .
+    \label{eq:KLT_def}
+\end{equation}
+
+Since KLT requires information about the solution {\it a priori}, small models
+that are similar to the test problem are developed to provide the necessary
+information.  This work identifies how similar the small models need be to
+provide an adequate representation of the test problem. KLT snapshots are
+energy group-dependent flux or current vectors from several spatial cells within
+one or more representative models.
+
+\subsection{Test Problem}
+
+To test the application of KLT in 2-D space, the C5G7 benchmark problem was
+adapted for use.  This benchmark consists of modeling a
+quarter core that has four, $17\times17$-pin
+assemblies \cite{C5G7}.  The configuration is detailed in
+\FIG{fig:C5G7_config}.  Each of the blocks in \FIG{fig:C5G7_config}
+represent either a fuel assembly or an equivalent area of
+moderator.  Each pincell is broken up into a $7\times7$
+Cartesian mesh. Thus, each pincell contained 49 spatial cells and provided 49
+energy dependent snapshots of each type (scalar flux, partial current, etc.).
+The cladding for the pincells was
+homogenized into the fuel part of the pincell.
+
+The standard C5G7 benchmark uses seven-group cross-sections, which precludes
+the need for an energy approximation.  Thus, a cross section library was
+generated with SCALE 5.1 in the SCALE 44-group format \cite{Scale}.  All other
+aspects of the benchmark were unchanged.
+
+\begin{figure}[htb]
+    \centering
+    \begin{tikzpicture}[scale=0.1, every node/.style={scale=1}]
+        \filldraw[xshift=42.84 cm, yshift=0 cm, fill=blue!30!white, draw=black]
+        (0, 0) rectangle (21.42,21.42) node[pos=.5] {Mod};
+        \filldraw[xshift=42.84 cm, yshift=21.42 cm, fill=blue!30!white,
+draw=black]
+        (0, 0) rectangle (21.42,21.42) node[pos=.5] {Mod};
+        \filldraw[xshift=42.84 cm, yshift=42.84 cm, fill=blue!30!white,
+draw=black]
+        (0, 0) rectangle (21.42,21.42) node[pos=.5] {Mod};
+        \filldraw[xshift=21.42 cm, yshift=42.84 cm, fill=blue!30!white,
+draw=black]
+        (0, 0) rectangle (21.42,21.42) node[pos=.5] {Mod};
+        \filldraw[xshift=0 cm, yshift=42.84 cm, fill=blue!30!white, draw=black]
+        (0, 0) rectangle (21.42,21.42) node[pos=.5] {Mod};
+
+
+
+        \foreach \x in {0,1.26,...,20.16}
+        \foreach \y in {0,1.26,...,20.16}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (0, 0) rectangle (1.26,1.26) node[pos=.5] {};
+        \foreach \x in {0,1.26,...,20.16}
+        \foreach \y in {0,1.26,...,20.16}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=green!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {5*1.26, 8*1.26, 11*1.26}
+        \foreach \y in {2*1.26, 14*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {3*1.26, 13*1.26}
+        \foreach \y in {3*1.26, 13*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {2*1.26, 5*1.26, 8*1.26, 11*1.26, 14*1.26}
+        \foreach \y in {5*1.26, 8*1.26, 11*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+
+
+
+        \foreach \x in {21.42,22.68,...,41.58}
+        \foreach \y in {21.42,22.68,...,41.58}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (0, 0) rectangle (1.26,1.26) node[pos=.5] {};
+        \foreach \x in {21.42,22.68,...,41.58}
+        \foreach \y in {21.42,22.68,...,41.58}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=green!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {22*1.26, 25*1.26, 28*1.26}
+        \foreach \y in {19*1.27, 31*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {20*1.26, 30*1.26}
+        \foreach \y in {20*1.26, 30*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {19*1.26, 22*1.26, 25*1.26, 28*1.26, 31*1.26}
+        \foreach \y in {22*1.26, 25*1.26, 28*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+
+
+
+        \foreach \x in {0,1.26,...,20.16}
+        \foreach \y in {21.42,22.68,...,41.58}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (0, 0) rectangle (1.26,1.26) node[pos=.5] {};
+        \foreach \x in {0,1.26,...,20.16}
+        \foreach \y in {21.42,22.68,...,41.58}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!30!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {1.26,2.52,...,20.16}
+        \foreach \y in {22.68,23.94,...,41.58}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!60!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {5*1.26,6*1.26,7*1.26,8*1.26,9*1.26,10*1.26,11*1.26}
+        \foreach \y in {20*1.26,30*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!90!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in
+        {4*1.26,5*1.26,6*1.26,7*1.26,8*1.26,9*1.26,10*1.26,11*1.26,12*1.26}
+        \foreach \y in {21*1.26,29*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!90!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {3.78,5.04,...,16.38}
+        \foreach \y in {27.72,28.98,...,36.46}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!90!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {5*1.26, 8*1.26, 11*1.26}
+        \foreach \y in {19*1.26, 31*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {3*1.26, 13*1.26}
+        \foreach \y in {20*1.26, 30*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {2*1.26, 5*1.26, 8*1.26, 11*1.26, 14*1.26}
+        \foreach \y in {22*1.26, 25*1.26, 28*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+
+
+
+         \foreach \x in {21.42,22.68,...,41.58}
+        \foreach \y in {0,1.26,...,20.16}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (0, 0) rectangle (1.26,1.26) node[pos=.5] {};
+        \foreach \x in {21.42,22.68,...,41.58}
+        \foreach \y in {0,1.26,...,20.16}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!30!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {22.68,23.94,...,41.58}
+        \foreach \y in {1.26,2.52,...,20.16}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!60!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {22*1.26,23*1.26,24*1.26,25*1.26,26*1.26,27*1.26,28*1.26}
+        \foreach \y in {3*1.26,13*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!90!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in
+{21*1.26,22*1.26,23*1.26,24*1.26,25*1.26,26*1.26,27*1.26,28*1.26,29*1.26}
+        \foreach \y in {4*1.26,12*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!90!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {25.2,26.46,...,39.06}
+        \foreach \y in {6.3,7.56,...,15.04}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=red!90!white, draw=black]
+        (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {22*1.26, 25*1.26, 28*1.26}
+        \foreach \y in {2*1.26, 14*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {20*1.26, 30*1.26}
+        \foreach \y in {3*1.26, 13*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+        \foreach \x in {19*1.26, 22*1.26, 25*1.26, 28*1.26, 31*1.26}
+        \foreach \y in {5*1.26, 8*1.26, 11*1.26}
+        \filldraw[xshift=\x cm, yshift=\y cm, fill=blue!30!white,
+        draw=black] (.63,.63) circle (.5) node[pos=.5] {};
+
+        \draw[xshift=3*21.42cm,yshift=1.5*21.42cm] node[right]
+        {\rotatebox{-90}{Vacuum}};
+        \draw[yshift=1.5*21.42cm] node[left] {\rotatebox{90}{Reflect}};
+        \draw[xshift=1.5*21.42cm,yshift=3*21.42cm] node[center, above]
+{{Vacuum}};
+        \draw[xshift=1.5*21.42cm] node[center, below] {{Reflect}};
+    \end{tikzpicture}
+    \caption{Configuration for C5G7 benchmark.  Each square represents the area
+of a
+             $17\times17$ pin assembly}
+    \label{fig:C5G7_config}
+\end{figure}
+
+For this test problem, the spatial and angular orders for the SERMENT
+\cite{RobertsSerment} reference solution and the RMM solutions for each
+snapshot case were set to fourth order. It is assumed that the relative
+error of the snapshot cases is a function of the energy expansion alone since
+all other aspects of the problem are identical between the reference solution
+and each test case.  It is impossible to be sure if this assumption is valid
+without computing the problem at better resolution.
+
+\subsection{Generation of Snapshots}
+
+\begin{table*}[htb]
+    \centering
+    \caption{Summary of snapshot models for C5G7 test Problem}
+    \begin{tabulary}{\linewidth}{c | L}\toprule
+        Abbreviation         & Model to generate snapshots \\ \midrule
+        Reduced Full-Core    & Spatially-averaged snapshots from whole core
+model (i.e.,         the test problem) \\
+        Combined-Assemblies  & Snapshots from assemblies used in core
+                               configuration \\
+        Combined-Pins        & Snapshots from pins used in core
+                               configuration combined with the pin
+                               junctions\\
+        Small-Core           & Snapshots from the small core model \\
+        Small-Assemblies     & Snapshots from the small assemblies used in the
+                               small core configuration \\
+        Reduced Small-Core   & Spatially-averaged snapshots from the small core
+model \\
+        1-D Approximation    & Snapshots from the 1-D approximation to the C5G7
+                               benchmark \\
+        \bottomrule
+    \end{tabulary}
+    \label{tab:C5G7snapshots}
+\end{table*}
+
+There are several models that are readily apparent choices to simplify the C5G7
+benchmark for use in generating snapshots.  The snapshots models for
+this test problem are summarized in \TAB{tab:C5G7snapshots}.  The first model
+was to use snapshots from the test problem itself to gain an understanding of
+the best possible snapshots.  However, the number of snapshots obtained for this
+model is prohibitively large, even after removing all duplicate snapshots by
+model symmetry, and thus unusable in the raw state.  However, by spatially
+averaging the snapshots over a pincell, the number of
+snapshots is reduced by a factor of 49, and thus becomes a manageable set with
+which to create basis functions.
+
+The Combined-Assemblies model was formed by taking snapshots from each assembly
+and combining the snapshots together.  For this snapshot model, each assembly
+was modeled with reflective conditions on all sides.  The next model was the
+Combined-Pins model, which derives snapshots from individual pincells for each
+fuel type.  The pincell snapshots are combined with snapshots from junctions of
+pincells. These junctions are modeled as
+$2\times2$-pin assemblies with
+reflective conditions.  There were a total of five different materials, thus
+ten unique junctions to model.
+
+The next model was to create a small version of the C5G7 core, which
+has the same assembly configuration shown in \FIG{fig:C5G7_config}, but
+instead uses $8\times8$-pin assemblies \cite{reedThesis}.  An additional model
+arises from the small core model, which is to combine snapshots from each of the
+small assemblies.  This is not expected to perform as well as the full-sized,
+combined-assembly model, but it will be quicker to create the snapshots, and
+thus the basis functions.  A third model from the small core was to spatially
+average the snapshots over each pincell similarly to the spatially-reduced,
+full-core solution.  The reduced, small-core model was used to approximate the
+non-spatially averaged, full-core model by comparing the reduced and non-reduced
+small-core models.
+
+The final snapshot model for the C5G7 test problem is to create a
+similar 1-D model \cite{reedThesis} with three sections: UO$_2$, MOX, and
+moderator.  The model is comprised of 51 pins that are each of width 1.26 cm.
+This problem was created with a reflective boundary condition on the UO$_2$
+side of the model and a vacuum boundary condition on the moderator side of the
+model.
+
+In general, snapshot models should
+be computationally quick to solve, yet similar to the test problem.  Timing
+studies provide little insight in this case because the snapshots are orders of
+magnitude quicker to generate than the response matrices. Furthermore, it is
+impossible to know {\it a priori} how many basis functions are required for
+accuracy before generating the response matrices.
+
+\section{Results and Analysis}
+
+The goal of this work was to see how applicable the method of snapshots and
+the KLT was to 2-D problems.  In the interest of time, the results for
+this section have been truncated to 10th order.  The overarching goal of the
+work was to achieve sub-$0.1\%$ relative pin
+power errors while reducing the necessary energy degrees of freedom by an order
+of magnitude.  As such, 10th order is sufficient to determine if KLT can reach
+the goal in a 2-D problem-space.  As mentioned previously, we assume any
+changes in the solution observed when using
+various energy bases is assumed to be a function of the energy basis alone.
+
+\begin{figure}[tb]
+    \centering
+    \includegraphics[trim=.1cm .25cm 2.0cm .4cm clip=true,
+    totalheight=0.28\textheight]{Figures/c/c5g7/rf_plots/phi/%
+        energy_basis_comparison_fission-10}
+    \caption{Relative error in fission density for 44-group, C5G7 test problem
+using snapshot of only $\phi$.}
+    \label{fig:c5g7-flux-only}
+\end{figure}
+
+% \begin{figure}[tb]
+%     \centering
+%     \includegraphics[trim=.1cm .25cm 2.0cm .4cm clip=true,
+%     totalheight=0.28\textheight]{Figures/s/c5g7/rf_plots/partial/%
+%         partial_energy_basis_comparison_fission-10}
+%     \caption{Relative error in fission density for 44-group, C5G7 test
+%         using snapshot of $J_{\text{up}}$ and $J_{\text{down}}$.}
+%     \label{fig:c5g7-current}
+% \end{figure}
+
+\begin{figure}[tb]
+    \centering
+    \includegraphics[trim=.1cm .25cm 2.0cm .4cm clip=true,
+    totalheight=0.28\textheight]{Figures/c/c5g7/rf_plots/partial/%
+        partial_energy_basis_comparison_fission-10}
+    \caption{Relative error in fission density for 44-group, C5G7 test problem
+        using snapshot of $\phi$, $J_{\text{up}}$, and $J_{\text{down}}$.}
+    \label{fig:c5g7-combined}
+\end{figure}
+
+\begin{figure}[tb]
+    \centering
+    \includegraphics[trim=.1cm .25cm 2.0cm .4cm clip=true,
+    totalheight=0.28\textheight]{Figures/c/c5g7/rf_plots/phi/%
+        energy_basis_comparison_pinpower-10}
+    \caption{Relative error in pin power for 44-group, C5G7 test problem
+using snapshot of only $\phi$.}
+    \label{fig:c5g7-flux-only-pp}
+\end{figure}
+
+% \begin{figure}[tb]
+%     \centering
+%     \includegraphics[trim=.1cm .25cm 2.0cm .4cm clip=true,
+%     totalheight=0.28\textheight]{Figures/s/c5g7/rf_plots/partial/%
+%         partial_energy_basis_comparison_pinpower-10}
+%     \caption{Relative error in pin power for 44-group, C5G7 test problem
+% using snapshot of both $J_{\text{up}}$ and $J_{\text{down}}$.}
+%     \label{fig:c5g7-partial-pp}
+% \end{figure}
+
+\begin{figure}[tb]
+    \centering
+    \includegraphics[trim=.1cm .25cm 2.0cm .4cm clip=true,
+    totalheight=0.28\textheight]{Figures/c/c5g7/rf_plots/partial/%
+        partial_energy_basis_comparison_pinpower-10}
+    \caption{Relative error in pin power for 44-group, C5G7 test problem
+using snapshot of both $\phi$, $J_{\text{up}}$, and $J_{\text{down}}$.}
+    \label{fig:c5g7-combined-pp}
+\end{figure}
+
+Each curve shown in this section except for `DLP' and `mDLP' was
+generated using the KLT basis with distinct snapshot data. The mDLP results
+represent the best case previously observed \cite{Roberts2014}.
+\FIGURE{fig:c5g7-flux-only} presents the results from using snapshots of only
+the scalar flux $\phi$ in the KLT basis generation in order to approximate the
+nodal fission densities.  Many of the snapshot models fall short of the goal of
+sub 0.1\% relative error in the first 10 degrees of freedom, but some snapshot
+models perform encouragingly well. The Small-Core performs the best at
+9th order, but the Combined-Pins model performs encouragingly well despite its
+simplicity.  Further, the Small-Core models performs similarly to the Reduced
+Small-Core, thus we may assume that the Reduced Full-Core model provides a
+close approximation to the Full-Core results.
+
+In general, the results are improved by including snapshots of the partial
+current $J$ for basis generation as shown in \FIG{fig:c5g7-combined}.  The
+Combined-Pins model performs quite well comparatively, and achieves the goal by
+9th order.  However, it is unknown if the relative error will remain below the
+goal at higher orders without running additional calculations.  Further, the
+Small-Core results are omitted because the number of snapshots was too high to
+apply KLT without averaging, thus we must take the Reduced Small-Core model as
+an approximation for the performance of the Small-Core model.
+
+Many of the same trends are observed for pin-power errors as shown in
+\FIGS{fig:c5g7-flux-only-pp}{fig:c5g7-combined-pp}.  The
+former uses snapshots of only $\phi$, while the latter also includes
+snapshots of $J$.  Since pin powers are a local quantity, it
+was expected (and observed) that the errors are larger than for the more global
+nodal fission densities.
+
+\section{Conclusion}
+
+For 2-D problems, many KLT basis outperform the mDLP and DLP bases for ERMM
+energy expansions because the KLT maximizes the information contained in
+low-order expansions.  In general, the results are
+improved by including the partial current in generation of snapshots as
+opposed to using only the scalar flux snapshots.
+
+An effective snapshot model is one that can capture the relevant physics of
+the problem while being computationally cheap.  The Combined-Pins
+model performed quite well despite its simplicity likely because information
+about each fuel type as well as the junction between materials were used in
+the construction.
+
+It appears that for heterogeneous problems such as the C5G7 benchmark, a basis
+expansion in the energy variable requires more degrees of freedom to reach the
+goal of sub-0.1\% relative error as compared to the 1D problems previously
+explored \cite{annualANS, reedThesis}.  Future work in this area would entail
+expanding this application to additional group structures to ensure the results
+are not group dependent.  Additionally, it would be interesting to explore
+applications of the KLT to expansion in other phase space variables.
+
+\section{Acknowledgements}
+The work of the first author was supported by the Kansas State University
+Nuclear Research Fellowship Program, generously sponsored by the U.S. Nuclear
+Regulatory Commission (Grant NRC-HQ-84-14-G-0033).
+
+%\section*{References}
+
+\bibliographystyle{ans}
+\bibliography{bibliography}
+\end{document}
